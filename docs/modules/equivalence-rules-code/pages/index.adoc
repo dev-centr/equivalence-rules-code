@@ -1,0 +1,79 @@
+= Code Rulesets Guide
+:navtitle: Code Rulesets Guide
+
+`equivalence-rules-code` is the core **Content Repository** for source code migrations. It hosts translation patterns written in lightweight Simple Declarative Language (SDL) files.
+
+== Directory Structure Rules
+
+To allow the ≡quivalence ≡ngine to resolve bindings automatically, files must adhere to strict pathing schemas:
+
+[source,text]
+----
+rules/
+└── <language>/         <-- Lowercase programming language (e.g., python, cpp)
+    └── <library>/       <-- Case-sensitive library or framework name (e.g., PyQt)
+        └── <from>-<to>.sdl <-- Transition boundaries (e.g., 5.15-6.0.sdl)
+----
+
+== SDL Rule Syntax
+
+Rules are written in SDL (`.sdl`) format. They declare replacements for imports, enumerations, classes, or patterns.
+
+.Example `rules/python/PyQt/5.15-6.0.sdl`
+[source,sdl]
+----
+rule "PyQt5-to-PyQt6-Enums" {
+  replace "Qt.WindowShortcut" "Qt.ShortcutContext.WindowShortcut"
+  replace "from PyQt5.QtCore import Qt" "from PyQt6.QtCore import Qt"
+}
+----
+
+== Contribution Workflow
+
+1. Fork the rules repository.
+2. Create a new rules file matching your language, library, and version boundaries (e.g. `rules/python/PyQt/5.15-6.0.sdl`).
+3. Formulate your adaptation replacements inside a `rule "rule-name" { ... }` block.
+4. Submit a Pull Request.
+
+== Automated CI Release Pipeline
+
+Rules repositories implement a packaging workflow that packs rules into `.tar.gz` and `.zip` archives upon tagging a release (`v*`). This allows fast retrieval and decompression by the D engine.
+
+.Rules Release Workflow (`.github/workflows/release.yml`)
+[source,yaml]
+----
+name: Release Rulesets
+on:
+  push:
+    tags: ['v*']
+permissions:
+  contents: write
+jobs:
+  package:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Create Archives
+        run: |
+          mkdir -p dist
+          tar -czf dist/rules-code-${{ github.ref_name }}.tar.gz rules/
+          zip -r dist/rules-code-${{ github.ref_name }}.zip rules/
+      - uses: actions/upload-artifact@v4
+        with:
+          name: rules-archives
+          path: dist/*
+  release:
+    needs: package
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          name: rules-archives
+      - uses: softprops/action-gh-release@v2
+        with:
+          files: |
+            *.tar.gz
+            *.zip
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+----

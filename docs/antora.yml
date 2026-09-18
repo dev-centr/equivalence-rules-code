@@ -1,0 +1,5 @@
+name: tools
+title: Tools
+version: ~
+nav:
+- modules/equivalence-rules-code/nav.adoc

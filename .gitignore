@@ -1,4 +1,4 @@
-# Exclude new files by default
+﻿# Exclude new files by default
 *
 
 # Include core files and folders
@@ -9,6 +9,8 @@
 !.github/workflows/*
 !README.adoc
 !README.md
+!docs/
+!docs/**
 !.gitignore
 !CHANGELOG.adoc
 !changelog-details/**
