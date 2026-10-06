@@ -20,3 +20,5 @@
 # Build artifacts
 **/*.exe
 .dub/
+!/.editorconfig
+!/.gitattributes
