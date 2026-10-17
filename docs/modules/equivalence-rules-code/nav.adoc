@@ -1,1 +1,2 @@
-* xref:index.adoc[Code Rulesets Guide]
+.Equivalence Rules: Code
+* xref:index.adoc[Overview]
